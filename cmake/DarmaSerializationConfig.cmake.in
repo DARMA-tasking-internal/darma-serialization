@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(DarmaUtility REQUIRED HINTS @DarmaUtility_DIR@)
+
+include("${CMAKE_CURRENT_LIST_DIR}/darmaSerializationTargets.cmake")
+
