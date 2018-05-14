@@ -29,7 +29,6 @@ add_serialization_test(test_simple_std_tuple)
 add_serialization_test(test_simple_std_set)
 add_serialization_test(test_simple_array)
 
-
 if(DARMA_SERIALIZATION_TESTING_SINGLE_EXECUTABLE)
   add_executable(run_all_serialization_tests ${serializationtestfiles})
   target_link_libraries(run_all_serialization_tests GTest::GTest GTest::Main)

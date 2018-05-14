@@ -17,6 +17,11 @@ set(CMAKE_MODULE_PATH
 option(DARMA_SERIALIZATION_ENABLE_TESTING "Enable testing for DARMA Serialization" OFF)
 option(DARMA_SERIALIZATION_TESTING_SINGLE_EXECUTABLE "build tests as a single executable" OFF)
 mark_as_advanced(DARMA_SERIALIZATION_TESTING_SINGLE_EXECUTABLE)
+option(DARMA_SERIALIZATION_ENABLE_COVERALLS "Enable coveralls coverage suport" Off)
+option(DARMA_SERIALIZATION_COVERALLS_UPLOAD "Upload coveralls results" Off)
+mark_as_advanced(DARMA_SERIALIZATION_ENABLE_COVERALLS)
+mark_as_advanced(DARMA_SERIALIZATION_COVERALLS_UPLOAD)
+
 
 ################################################################################
 # darma_serialization interface library
@@ -82,6 +87,20 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/DarmaSerializationConfig.cmake ${CMAKE
 if(DARMA_SERIALIZATION_ENABLE_TESTING)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+if (DARMA_ENABLE_COVERALLS)
+  if (!DARMA_SERIALIZATION_ENABLE_TESTING)
+    message(FATAL_ERROR "Can't run coveralls coverage without tests enabled")
+  endif()
+  include(Coveralls)
+  coveralls_turn_on_coverage()
+  file(GLOB_RECURSE all_source_files RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" source/include/darma/*.h)
+  coveralls_setup(
+    "${all_source_files}"
+    ${DARMA_COVERALLS_UPLOAD}
+    "${PROJECT_SOURCE_DIR}/cmake-modules/coveralls/cmake"
+  )
 endif()
 
 ################################################################################
