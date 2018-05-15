@@ -91,7 +91,7 @@ if(DARMA_SERIALIZATION_ENABLE_TESTING)
   add_subdirectory(tests)
 endif()
 
-if (DARMA_ENABLE_COVERALLS)
+if (DARMA_SERIALIZATION_ENABLE_COVERALLS)
   if (!DARMA_SERIALIZATION_ENABLE_TESTING)
     message(FATAL_ERROR "Can't run coveralls coverage without tests enabled")
   endif()
