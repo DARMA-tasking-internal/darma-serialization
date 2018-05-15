@@ -148,7 +148,7 @@ void darma_pack(T const& obj, CopyPackingArchive& ar) {
 
 // Ensure the "regular" serializer never gets used:
 template <typename T>
-void darma_unpack(darma_runtime::serialization::allocated_buffer_for<T> alloc, CopyUnpackingArchive<>& ar) {
+void darma_unpack(darma::serialization::allocated_buffer_for<T> alloc, CopyUnpackingArchive<>& ar) {
   ar.unpack_next_item_at<T>(alloc.pointer);
 }
 

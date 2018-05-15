@@ -51,7 +51,7 @@
 
 #include <cassert>
 
-namespace darma_runtime {
+namespace darma {
 namespace serialization {
 
 namespace detail {
@@ -64,7 +64,7 @@ template <typename SerializationBuffer=detail::_not_a_serialization_buffer>
 class PointerReferencePackingArchive {
   private:
 
-    darma_runtime::utility::compressed_pair<char*&, SerializationBuffer> data_spot_;
+    darma::utility::compressed_pair<char*&, SerializationBuffer> data_spot_;
 
     template <typename... SerializationBufferCtorArgs>
     PointerReferencePackingArchive(
@@ -139,7 +139,7 @@ class PointerReferenceUnpackingArchive {
 
   private:
 
-    darma_runtime::utility::compressed_pair<char const*&, Allocator> data_spot_;
+    darma::utility::compressed_pair<char const*&, Allocator> data_spot_;
 
     explicit
     PointerReferenceUnpackingArchive(char const*& ptr)
@@ -181,7 +181,7 @@ class PointerReferenceUnpackingArchive {
       std::enable_if_t<
         not std::is_trivially_destructible<T>::value
           and not std::is_array<T>::value,
-        darma_runtime::utility::_not_a_type
+        darma::utility::_not_a_type
       > = { }
     ) & {
       auto* buffer = static_cast<void*>(&obj);
@@ -197,7 +197,7 @@ class PointerReferenceUnpackingArchive {
       T& obj,
       std::enable_if_t<
         std::is_trivially_destructible<T>::value,
-        darma_runtime::utility::_not_a_type
+        darma::utility::_not_a_type
       > = { }
     ) & {
       auto* buffer = static_cast<void*>(&obj);
@@ -236,7 +236,7 @@ class PointerReferenceUnpackingArchive {
     inline T unpack_next_item_as(
       std::enable_if_t<
         (sizeof(T) > DARMA_SERIALIZATION_SIMPLE_ARCHIVE_UNPACK_STACK_ALLOCATION_MAX),
-        darma_runtime::utility::_not_a_type_numbered<0>
+        darma::utility::_not_a_type_numbered<0>
       > = { }
     ) & {
       using allocator_t = typename std::allocator_traits<Allocator>::template rebind_alloc<T>;
@@ -254,7 +254,7 @@ class PointerReferenceUnpackingArchive {
     inline T unpack_next_item_as(
       std::enable_if_t<
         (sizeof(T) <= DARMA_SERIALIZATION_SIMPLE_ARCHIVE_UNPACK_STACK_ALLOCATION_MAX),
-        darma_runtime::utility::_not_a_type_numbered<1>
+        darma::utility::_not_a_type_numbered<1>
       > = { }
     ) & {
       char on_stack_buffer[sizeof(T)];
@@ -296,6 +296,6 @@ class PointerReferenceUnpackingArchive {
 };
 
 } // end namespace serialization
-} // end namespace darma_runtime
+} // end namespace darma
 
 #endif //DARMAFRONTEND_SERIALIZATION_POINTER_REFERENCE_ARCHIVE_H

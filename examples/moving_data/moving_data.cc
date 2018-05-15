@@ -82,7 +82,7 @@ void unpack_it_the_easy_way(SerializationBuffer&& buffer) {
   T value = SerializationHandler::template deserialize<T>(std::forward<SerializationBuffer>(buffer));
   //----------------------------------------------------------------------------
 
-  std::cout << "  -> When unpacked as type " << darma_runtime::utility::try_demangle<T>::name() << "," << std::endl;
+  std::cout << "  -> When unpacked as type " << darma::utility::try_demangle<T>::name() << "," << std::endl;
   std::cout << "       value is: " << value << std::endl;
 };
 
@@ -144,7 +144,7 @@ int main() {
 
   // Template parameter to SimpleSerializationHandler is an allocator that it
   // uses to create buffers; defaults to std::allocator
-  using handler_t = darma_runtime::serialization::SimpleSerializationHandler<>;
+  using handler_t = darma::serialization::SimpleSerializationHandler<>;
 
   int i = 42;
   double val = 3.14;
@@ -184,7 +184,7 @@ int main() {
     char message[buffer.capacity()];
     std::memcpy(message, buffer.data(), buffer.capacity()); // here's our fake MPI_Send or whatever
     // Create a serialization buffer that refers to the message off of the wire:
-    auto mbuff = darma_runtime::serialization::NonOwningSerializationBuffer(message, buffer.capacity());
+    auto mbuff = darma::serialization::NonOwningSerializationBuffer(message, buffer.capacity());
 
     // Since `mbuff` is of a type that meets the requirements of SerializationBuffer,
     // it can be used anywhere we were using `buffer`:
