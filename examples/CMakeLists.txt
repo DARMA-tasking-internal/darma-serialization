@@ -5,3 +5,4 @@ macro(add_serialization_example name files)
 endmacro()
 
 add_serialization_example(moving_data moving_data/moving_data.cc)
+add_serialization_example(copy_constructor_archive copy_constructor_archive/copy_constructor_archive.cc)
