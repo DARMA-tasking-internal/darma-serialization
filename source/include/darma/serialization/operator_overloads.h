@@ -51,7 +51,7 @@
 #include <type_traits>
 #include <memory>
 
-namespace darma_runtime {
+namespace darma {
 namespace serialization {
 namespace detail {
 
@@ -67,21 +67,21 @@ using _has_darma_pack_archetype = decltype(
 
 template <typename Archive, typename T>
 using _has_darma_unpack_archetype = decltype(
-  darma_unpack(std::declval<darma_runtime::serialization::allocated_buffer_for<T>>(), std::declval<Archive&>())
+  darma_unpack(std::declval<darma::serialization::allocated_buffer_for<T>>(), std::declval<Archive&>())
 );
 
 } // end namespace detail
 } // end namespace serialization
-} // end namespace darma_runtime
+} // end namespace darma
 
 // Put heavily-constrained operator| overloads in the global namespace
 
 template <typename Archive, typename T>
 std::enable_if_t<
-  darma_runtime::serialization::is_archive_v<Archive>
-  and darma_runtime::serialization::is_sizing_archive_v<Archive>
+  darma::serialization::is_archive_v<Archive>
+  and darma::serialization::is_sizing_archive_v<Archive>
   and tinympl::is_detected_exact<void,
-    darma_runtime::serialization::detail::_has_darma_compute_size_archetype,
+    darma::serialization::detail::_has_darma_compute_size_archetype,
     Archive, T
   >::value,
   Archive&
@@ -94,10 +94,10 @@ operator|(Archive& ar, T const& val) {
 
 template <typename Archive, typename T>
 std::enable_if_t<
-  darma_runtime::serialization::is_archive_v<Archive>
-    and darma_runtime::serialization::is_sizing_archive_v<Archive>
+  darma::serialization::is_archive_v<Archive>
+    and darma::serialization::is_sizing_archive_v<Archive>
     and tinympl::is_detected_exact<void,
-      darma_runtime::serialization::detail::_has_darma_compute_size_archetype,
+      darma::serialization::detail::_has_darma_compute_size_archetype,
       Archive, T
     >::value,
   Archive&
@@ -110,10 +110,10 @@ operator%(Archive& ar, T const& val) {
 
 template <typename Archive, typename T>
 std::enable_if_t<
-  darma_runtime::serialization::is_archive_v<Archive>
-    and darma_runtime::serialization::is_packing_archive_v<Archive>
+  darma::serialization::is_archive_v<Archive>
+    and darma::serialization::is_packing_archive_v<Archive>
     and tinympl::is_detected_exact<void,
-      darma_runtime::serialization::detail::_has_darma_pack_archetype,
+      darma::serialization::detail::_has_darma_pack_archetype,
       Archive, T
     >::value,
   Archive&
@@ -126,10 +126,10 @@ operator|(Archive& ar, T const& val) {
 
 template <typename Archive, typename T>
 std::enable_if_t<
-  darma_runtime::serialization::is_archive_v<Archive>
-    and darma_runtime::serialization::is_packing_archive_v<Archive>
+  darma::serialization::is_archive_v<Archive>
+    and darma::serialization::is_packing_archive_v<Archive>
     and tinympl::is_detected_exact<void,
-      darma_runtime::serialization::detail::_has_darma_pack_archetype,
+      darma::serialization::detail::_has_darma_pack_archetype,
       Archive, T
     >::value,
   Archive&
@@ -143,10 +143,10 @@ operator<<(Archive& ar, T const& val) {
 
 template <typename Archive, typename T>
 std::enable_if_t<
-  darma_runtime::serialization::is_archive_v<Archive>
-    and darma_runtime::serialization::is_unpacking_archive_v<Archive>
+  darma::serialization::is_archive_v<Archive>
+    and darma::serialization::is_unpacking_archive_v<Archive>
     and tinympl::is_detected_exact<void,
-      darma_runtime::serialization::detail::_has_darma_unpack_archetype,
+      darma::serialization::detail::_has_darma_unpack_archetype,
       Archive, T
     >::value,
   Archive&
@@ -157,16 +157,16 @@ operator|(Archive& ar, T& val) {
   alloc_t alloc = ar.template get_allocator_as<alloc_t>();
   std::allocator_traits<alloc_t>::destroy(alloc, &val);
   // Call with an unqualified name to trigger ADL
-  darma_unpack(darma_runtime::serialization::allocated_buffer_for<T>{static_cast<void*>(&val)}, ar);
+  darma_unpack(darma::serialization::allocated_buffer_for<T>{static_cast<void*>(&val)}, ar);
   return ar;
 };
 
 template <typename Archive, typename T>
 std::enable_if_t<
-  darma_runtime::serialization::is_archive_v<Archive>
-    and darma_runtime::serialization::is_unpacking_archive_v<Archive>
+  darma::serialization::is_archive_v<Archive>
+    and darma::serialization::is_unpacking_archive_v<Archive>
     and tinympl::is_detected_exact<void,
-      darma_runtime::serialization::detail::_has_darma_unpack_archetype,
+      darma::serialization::detail::_has_darma_unpack_archetype,
       Archive, T
     >::value,
   Archive&
@@ -177,7 +177,7 @@ operator>>(Archive& ar, T& val) {
   alloc_t alloc = ar.template get_allocator_as<alloc_t>();
   std::allocator_traits<alloc_t>::destroy(alloc, &val);
   // Call with an unqualified name to trigger ADL
-  darma_unpack(darma_runtime::serialization::allocated_buffer_for<T>{static_cast<void*>(&val)}, ar);
+  darma_unpack(darma::serialization::allocated_buffer_for<T>{static_cast<void*>(&val)}, ar);
   return ar;
 };
 

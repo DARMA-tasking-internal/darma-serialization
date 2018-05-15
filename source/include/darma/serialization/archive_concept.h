@@ -49,7 +49,7 @@
 
 #include <type_traits>
 
-namespace darma_runtime {
+namespace darma {
 namespace serialization {
 
 template <typename T>
@@ -113,6 +113,6 @@ template <typename T>
 constexpr auto is_archive_v = is_archive<T>::value;
 
 } // end namespace serialization
-} // end namespace darma_runtime
+} // end namespace darma
 
 #endif //DARMASERIALIZATION_ARCHIVE_CONCEPT_H
