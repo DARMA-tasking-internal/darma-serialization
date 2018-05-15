@@ -48,8 +48,10 @@
 #include <darma/utility/not_a_type.h>
 
 #include "simple_archive.h"
+#include "archive_concept.h"
 #include "simple_handler_fwd.h"
 #include "pointer_reference_handler_fwd.h"
+#include "archive_concept.h"
 
 namespace darma_runtime {
 namespace serialization {
@@ -136,22 +138,21 @@ struct SimpleSerializationHandler {
       return SimpleSizingArchive{};
     }
 
-    // Disabled for now, until I get the time to implement the concepts for
-    // SizingArchive and SerializationBuffer so that I can distinguish between
-    // this one and the SerializationBuffer overload
-    //template <typename CompatibleSizingArchive>
-    //static auto
-    //make_packing_archive(
-    //  CompatibleSizingArchive&& ar,
-    //  std::enable_if_t<
-    //    std::is_rvalue_reference<CompatibleSizingArchive&&>::value,
-    //    darma_runtime::utility::_not_a_type
-    //  > = { }
-    //) {
-    //  auto size = SimpleSerializationHandler::get_size(ar);
-    //  ar.size_ = 0; // set size to zero as part of expiring the archive
-    //  return make_packing_archive(size);
-    //}
+    template <typename CompatibleSizingArchive>
+    static auto
+    make_packing_archive(
+      CompatibleSizingArchive&& ar,
+      std::enable_if_t<
+        std::is_rvalue_reference<CompatibleSizingArchive&&>::value
+        // Only the simple one is compatible for now:
+        and std::is_same<SimpleSizingArchive, CompatibleSizingArchive>::value,
+        darma_runtime::utility::_not_a_type
+      > = { }
+    ) {
+      auto size = SimpleSerializationHandler::get_size(ar);
+      ar.size_ = 0; // set size to zero as part of expiring the archive
+      return make_packing_archive(size);
+    }
 
     static auto
     make_packing_archive(size_t size) {
@@ -165,7 +166,8 @@ struct SimpleSerializationHandler {
       SerializationBuffer&& buffer,
       // Enforce move semantics on a forwarding reference template
       std::enable_if_t<
-        std::is_rvalue_reference<SerializationBuffer&&>::value,
+        not is_sizing_archive_v<SerializationBuffer>
+        and std::is_rvalue_reference<SerializationBuffer&&>::value,
         darma_runtime::utility::_not_a_type
       > = { }
     ) {

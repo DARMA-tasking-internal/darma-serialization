@@ -83,6 +83,10 @@ class SimpleSizingArchive {
 
   public:
 
+    // Concept "shortcut" tag
+    using is_sizing_archive_t = std::true_type;
+    using is_archive_t = std::true_type;
+
     static constexpr bool is_sizing() { return true; }
     static constexpr bool is_packing() { return false; }
     static constexpr bool is_unpacking() { return false; }
@@ -130,6 +134,10 @@ class SimplePackingArchive {
 
   public:
 
+    // Concept "shortcut" tag
+    using is_packing_archive_t = std::true_type;
+    using is_archive_t = std::true_type;
+
     static constexpr bool is_sizing() { return false; }
     static constexpr bool is_packing() { return true; }
     static constexpr bool is_unpacking() { return false; }
@@ -161,6 +169,10 @@ class SimplePackingArchive {
 template <typename Allocator=std::allocator<char>>
 class SimpleUnpackingArchive {
   public:
+
+    // Concept "shortcut" tag
+    using is_unpacking_archive_t = std::true_type;
+    using is_archive_t = std::true_type;
 
     using allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<char>;
 

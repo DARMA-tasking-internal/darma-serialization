@@ -91,6 +91,10 @@ class PointerReferencePackingArchive {
 
   public:
 
+    // Concept "shortcut" tag
+    using is_packing_archive_t = std::true_type;
+    using is_archive_t = std::true_type;
+
     PointerReferencePackingArchive(PointerReferencePackingArchive&&) = default;
 
     static constexpr bool is_sizing() { return false; }
@@ -126,6 +130,10 @@ class PointerReferencePackingArchive {
 template <typename Allocator = std::allocator<char>>
 class PointerReferenceUnpackingArchive {
   public:
+
+    // Concept "shortcut" tag
+    using is_unpacking_archive_t = std::true_type;
+    using is_archive_t = std::true_type;
 
     using allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<char>;
 

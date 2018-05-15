@@ -99,6 +99,13 @@ struct DynamicSerializationBuffer {
       other.begin_ = other.end_.first() = nullptr;
     }
 
+    DynamicSerializationBuffer& operator=(DynamicSerializationBuffer&& other) {
+      begin_ = other.begin_;
+      end_ = std::move(other.end_);
+      other.begin_ = other.end_.first() = nullptr;
+      return *this;
+    }
+
     char* data() { return begin_; }
     char const* data() const { return begin_; }
 

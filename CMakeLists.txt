@@ -22,6 +22,8 @@ option(DARMA_SERIALIZATION_COVERALLS_UPLOAD "Upload coveralls results" Off)
 mark_as_advanced(DARMA_SERIALIZATION_ENABLE_COVERALLS)
 mark_as_advanced(DARMA_SERIALIZATION_COVERALLS_UPLOAD)
 
+option(DARMA_SERIALIZATION_BUILD_EXAMPLES "Build examples for DARMA serialization" Off)
+
 
 ################################################################################
 # darma_serialization interface library
@@ -103,4 +105,11 @@ if (DARMA_ENABLE_COVERALLS)
   )
 endif()
 
+
 ################################################################################
+# Examples
+################################################################################
+
+if(DARMA_SERIALIZATION_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
