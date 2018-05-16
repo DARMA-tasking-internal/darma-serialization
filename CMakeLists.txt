@@ -21,8 +21,9 @@ option(DARMA_SERIALIZATION_ENABLE_COVERALLS "Enable coveralls coverage suport" O
 option(DARMA_SERIALIZATION_COVERALLS_UPLOAD "Upload coveralls results" Off)
 mark_as_advanced(DARMA_SERIALIZATION_ENABLE_COVERALLS)
 mark_as_advanced(DARMA_SERIALIZATION_COVERALLS_UPLOAD)
+option(DARMA_SERIALIZATION_ENABLE_DOCS "Creates a doc target that uses Doxygen to generate documentation" Off)
 
-option(DARMA_SERIALIZATION_BUILD_EXAMPLES "Build examples for DARMA serialization" Off)
+option(DARMA_SERIALIZATION_ENABLE_EXAMPLES "Build examples for DARMA serialization" Off)
 
 
 ################################################################################
@@ -110,6 +111,21 @@ endif()
 # Examples
 ################################################################################
 
-if(DARMA_SERIALIZATION_BUILD_EXAMPLES)
+if(DARMA_SERIALIZATION_ENABLE_EXAMPLES)
   add_subdirectory(examples)
+endif()
+
+################################################################################
+# Documentation
+################################################################################
+
+if(DARMA_SERIALIZATION_ENABLE_DOCS)
+  find_package(Doxygen REQUIRED)
+  set(DOXYGEN_ALIASES
+    concept=\"\\xrefitem concept \\\"Concept\\\" \\\"Concepts\\\" \"
+  )
+  doxygen_add_docs(doc
+    ${PROJECT_SOURCE_DIR}/source/include
+    COMMENT "Generate Doxygen documentation"
+  )
 endif()
