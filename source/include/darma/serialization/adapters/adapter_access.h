@@ -84,35 +84,27 @@ struct ArchiveAdapterAccess {
  */
 template <typename SizingArchiveImplementation>
 struct SizingArchiveAdapter : SizingArchiveImplementation {
-  private:
 
-    using impl_t = SizingArchiveImplementation;
-    impl_t impl_;
+  using is_sizing_archive_t = std::true_type;
+  using is_archive_t = std::true_type;
 
-  public:
+  SizingArchiveAdapter() = default;
+  SizingArchiveAdapter(SizingArchiveAdapter const&) = delete;
+  SizingArchiveAdapter(SizingArchiveAdapter&&) = default;
+  SizingArchiveAdapter& operator=(SizingArchiveAdapter const&) = default;
+  SizingArchiveAdapter& operator=(SizingArchiveAdapter&&) = default;
+  ~SizingArchiveAdapter() = default;
 
-    using is_sizing_archive_t = std::true_type;
-    using is_archive_t = std::true_type;
+  using SizingArchiveImplementation::SizingArchiveImplementation;
 
-    SizingArchiveAdapter() = default;
-    SizingArchiveAdapter(SizingArchiveAdapter const&) = delete;
-    SizingArchiveAdapter(SizingArchiveAdapter&&) = default;
-    SizingArchiveAdapter& operator==(SizingArchiveAdapter const&) = default;
-    SizingArchiveAdapter& operator==(SizingArchiveAdapter&&) = default;
-    ~SizingArchiveAdapter() = default;
+  static constexpr bool is_sizing() { return true; }
+  static constexpr bool is_packing() { return false; }
+  static constexpr bool is_unpacking() { return false; }
 
-    SizingArchiveAdapter(SizingArchiveImplementation&& impl)
-      : impl_(std::move(impl))
-    { }
-
-    static constexpr bool is_sizing() { return true; }
-    static constexpr bool is_packing() { return false; }
-    static constexpr bool is_unpacking() { return false; }
-
-    void add_to_size_raw(size_t size) {
-      // should pretty much never be used, but whatever:
-      ArchiveAdapterAccess::size_reference(impl_) += size;
-    }
+  void add_to_size_raw(size_t size) {
+    // should pretty much never be used, but whatever:
+    ArchiveAdapterAccess::size_reference(*static_cast<SizingArchiveImplementation*>(this)) += size;
+  }
 };
 
 /**
@@ -124,41 +116,33 @@ struct SizingArchiveAdapter : SizingArchiveImplementation {
  */
 template <typename PackingArchiveImplementation>
 struct PackingArchiveAdapter : PackingArchiveImplementation {
-  private:
+  using is_packing_archive_t = std::true_type;
+  using is_archive_t = std::true_type;
 
-    using impl_t = PackingArchiveImplementation;
-    impl_t impl_;
+  PackingArchiveAdapter() = default;
+  PackingArchiveAdapter(PackingArchiveAdapter const&) = delete;
+  PackingArchiveAdapter(PackingArchiveAdapter&&) = default;
+  PackingArchiveAdapter& operator=(PackingArchiveAdapter const&) = default;
+  PackingArchiveAdapter& operator=(PackingArchiveAdapter&&) = default;
+  ~PackingArchiveAdapter() = default;
 
-    // Check for either a `spot` member or a `spot_reference()` function
+  using PackingArchiveImplementation::PackingArchiveImplementation;
 
-  public:
+  static constexpr bool is_sizing() { return false; }
+  static constexpr bool is_packing() { return true; }
+  static constexpr bool is_unpacking() { return false; }
 
-    using is_sizing_archive_t = std::true_type;
-    using is_archive_t = std::true_type;
-
-    PackingArchiveAdapter() = default;
-    PackingArchiveAdapter(PackingArchiveAdapter const&) = delete;
-    PackingArchiveAdapter(PackingArchiveAdapter&&) = default;
-    PackingArchiveAdapter& operator==(PackingArchiveAdapter const&) = default;
-    PackingArchiveAdapter& operator==(PackingArchiveAdapter&&) = default;
-    ~PackingArchiveAdapter() = default;
-
-    PackingArchiveAdapter(PackingArchiveImplementation&& impl)
-      : impl_(std::move(impl))
-    { }
-
-    static constexpr bool is_sizing() { return false; }
-    static constexpr bool is_packing() { return true; }
-    static constexpr bool is_unpacking() { return false; }
-
-    template <typename ContiguousIterator>
-    void pack_data_raw(ContiguousIterator begin, ContiguousIterator end) {
-      // Use memcpy, since std::copy invokes the assignment operator, and "raw"
-      // implies that this isn't necessary
-      auto size = std::distance(begin, end) * sizeof(value_type);
-      std::memcpy(ArchiveAdapterAccess::buffer_spot_reference(impl_), static_cast<void const*>(begin), size);
-      ArchiveAdapterAccess::buffer_spot_reference(impl_) += size;
-    }
+  template <typename ContiguousIterator>
+  void pack_data_raw(ContiguousIterator begin, ContiguousIterator end) {
+    using value_type =
+      std::remove_const_t<std::remove_reference_t<decltype(*begin)>>;
+    // Use memcpy, since std::copy invokes the assignment operator, and "raw"
+    // implies that this isn't necessary
+    auto size = std::distance(begin, end) * sizeof(value_type);
+    char*& spot = ArchiveAdapterAccess::buffer_spot_reference(*static_cast<PackingArchiveImplementation*>(this));
+    std::memcpy(spot, static_cast<void const*>(begin), size);
+    spot += size;
+  }
 };
 
 } // end namespace serialization

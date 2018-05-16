@@ -147,7 +147,8 @@ int main() {
   s_ar | i | val | str;
 
   char buffer[s_ar.size];
-  auto p_ar = CopyPackingArchive{buffer};
+  auto p_ar = CopyPackingArchive();
+  p_ar.spot = buffer;
   p_ar | i | val | str;
 
 
