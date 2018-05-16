@@ -44,6 +44,7 @@
 
 #include <darma/serialization/serialization_traits.h>
 #include <darma/serialization/operator_overloads.h>
+#include <darma/serialization/adapters/adapter_access.h>
 
 #include <cstdlib>
 #include <type_traits>
@@ -55,37 +56,21 @@
 // An example of how to hook directly into copy constructor behavior using
 // the ADL-based customization points
 
-struct CopySizingArchive {
+struct CopySizingArchiveImplementation {
   size_t size = 0;
-
-  void add_to_size_raw(size_t size) {
-    // should pretty much never be used, but whatever:
-    size += size;
-  }
-
-  static constexpr bool is_sizing() { return true; }
-  static constexpr bool is_packing() { return false; }
-  static constexpr bool is_unpacking() { return false; }
-  using is_sizing_archive_t = std::true_type;
-  using is_archive_t = std::true_type;
+  // Interface for the SizingArchiveAdapter to use:
+  size_t& size_reference() { return size; }
 };
+using CopySizingArchive =
+  darma::serialization::SizingArchiveAdapter<CopySizingArchiveImplementation>;
 
-struct CopyPackingArchive {
+struct CopyPackingArchiveImplementation {
   char* spot = nullptr;
-
-  template <typename ContiguousIterator>
-  void pack_data_raw(ContiguousIterator begin, ContiguousIterator end) {
-    for(; begin != end; ++begin) {
-      *this | *begin;
-    }
-  }
-
-  static constexpr bool is_sizing() { return false; }
-  static constexpr bool is_packing() { return true; }
-  static constexpr bool is_unpacking() { return false; }
-  using is_packing_archive_t = std::true_type;
-  using is_archive_t = std::true_type;
+  // Interface for the PackingArchiveAdapter to use:
+  char*& buffer_spot_reference() { return spot; }
 };
+using CopyPackingArchive =
+  darma::serialization::PackingArchiveAdapter<CopyPackingArchiveImplementation>;
 
 template <typename Allocator=std::allocator<char>>
 struct CopyUnpackingArchive {

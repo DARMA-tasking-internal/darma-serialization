@@ -45,8 +45,123 @@
 #ifndef DARMASERIALIZATION_ADAPTER_ACCESS_H
 #define DARMASERIALIZATION_ADAPTER_ACCESS_H
 
-namespace darma_runtime {
+#include <tinympl/detection.hpp>
 
-} // end namespace darma_runtime
+#include <type_traits>
+
+namespace darma {
+namespace serialization {
+
+struct ArchiveAdapterAccess {
+
+  private:
+
+    template <typename ImplT>
+    static inline char*&
+    size_reference(ImplT& ar) {
+      return ar.size_reference();
+    }
+
+    template <typename ImplT>
+    static inline char*&
+    buffer_spot_reference(ImplT& ar) {
+      return ar.buffer_spot_reference();
+    }
+
+    template <typename>
+    friend struct SizingArchiveAdapter;
+
+    template <typename>
+    friend struct PackingArchiveAdapter;
+};
+
+/**
+ * @todo document this
+ * @tparam SizingArchiveImplementation
+ *  SizingArchiveImplementation requires a `size_reference()` method
+ *  that is accessible by ArchiveAdapterAccess and returns a reference to an
+ *  object of a type that meets the requirements of `Integral`
+ */
+template <typename SizingArchiveImplementation>
+struct SizingArchiveAdapter : SizingArchiveImplementation {
+  private:
+
+    using impl_t = SizingArchiveImplementation;
+    impl_t impl_;
+
+  public:
+
+    using is_sizing_archive_t = std::true_type;
+    using is_archive_t = std::true_type;
+
+    SizingArchiveAdapter() = default;
+    SizingArchiveAdapter(SizingArchiveAdapter const&) = delete;
+    SizingArchiveAdapter(SizingArchiveAdapter&&) = default;
+    SizingArchiveAdapter& operator==(SizingArchiveAdapter const&) = default;
+    SizingArchiveAdapter& operator==(SizingArchiveAdapter&&) = default;
+    ~SizingArchiveAdapter() = default;
+
+    SizingArchiveAdapter(SizingArchiveImplementation&& impl)
+      : impl_(std::move(impl))
+    { }
+
+    static constexpr bool is_sizing() { return true; }
+    static constexpr bool is_packing() { return false; }
+    static constexpr bool is_unpacking() { return false; }
+
+    void add_to_size_raw(size_t size) {
+      // should pretty much never be used, but whatever:
+      ArchiveAdapterAccess::size_reference(impl_) += size;
+    }
+};
+
+/**
+ * @todo document this
+ * @tparam PackingArchiveImplementation
+ *  PackingArchiveImplementation requires a `buffer_spot_reference()` method
+ *  that is accessible by ArchiveAdapterAccess and returns an object contextually
+ *  convertible to `char*&`
+ */
+template <typename PackingArchiveImplementation>
+struct PackingArchiveAdapter : PackingArchiveImplementation {
+  private:
+
+    using impl_t = PackingArchiveImplementation;
+    impl_t impl_;
+
+    // Check for either a `spot` member or a `spot_reference()` function
+
+  public:
+
+    using is_sizing_archive_t = std::true_type;
+    using is_archive_t = std::true_type;
+
+    PackingArchiveAdapter() = default;
+    PackingArchiveAdapter(PackingArchiveAdapter const&) = delete;
+    PackingArchiveAdapter(PackingArchiveAdapter&&) = default;
+    PackingArchiveAdapter& operator==(PackingArchiveAdapter const&) = default;
+    PackingArchiveAdapter& operator==(PackingArchiveAdapter&&) = default;
+    ~PackingArchiveAdapter() = default;
+
+    PackingArchiveAdapter(PackingArchiveImplementation&& impl)
+      : impl_(std::move(impl))
+    { }
+
+    static constexpr bool is_sizing() { return false; }
+    static constexpr bool is_packing() { return true; }
+    static constexpr bool is_unpacking() { return false; }
+
+    template <typename ContiguousIterator>
+    void pack_data_raw(ContiguousIterator begin, ContiguousIterator end) {
+      // Use memcpy, since std::copy invokes the assignment operator, and "raw"
+      // implies that this isn't necessary
+      auto size = std::distance(begin, end) * sizeof(value_type);
+      std::memcpy(ArchiveAdapterAccess::buffer_spot_reference(impl_), static_cast<void const*>(begin), size);
+      ArchiveAdapterAccess::buffer_spot_reference(impl_) += size;
+    }
+};
+
+} // end namespace serialization
+} // end namespace darma
 
 #endif //DARMASERIALIZATION_ADAPTER_ACCESS_H
