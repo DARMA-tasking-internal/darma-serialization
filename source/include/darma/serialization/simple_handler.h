@@ -129,6 +129,18 @@ struct SimpleSerializationHandler {
 
   public:
 
+    template <typename SizingArchive>
+    static constexpr auto compatible_sizing_archive_v =
+      std::is_same<SizingArchive, SimpleSizingArchive>::value;
+
+    template <typename PackingArchive>
+    static constexpr auto compatible_packing_archive_v =
+      std::is_same<PackingArchive, SimplePackingArchive<>>::value;
+
+    template <typename UnpackingArchive>
+    static constexpr auto compatible_unpacking_archive_v =
+      std::is_same<UnpackingArchive, SimpleUnpackingArchive<Allocator>>::value;
+
 
     //==========================================================================
     // <editor-fold desc="archive creation"> {{{1
