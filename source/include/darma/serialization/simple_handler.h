@@ -135,7 +135,7 @@ struct SimpleSerializationHandler {
 
     template <typename PackingArchive>
     static constexpr auto compatible_packing_archive_v =
-      std::is_same<PackingArchive, SimplePackingArchive>::value;
+      std::is_same<PackingArchive, SimplePackingArchive<>>::value;
 
     template <typename UnpackingArchive>
     static constexpr auto compatible_unpacking_archive_v =
