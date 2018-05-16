@@ -119,13 +119,41 @@ endif()
 # Documentation
 ################################################################################
 
+# from https://stackoverflow.com/questions/11246637/using-sphinx-apidoc-to-generate-documentation-from-c-code
+macro(add_sphinx_target TARGET_NAME BUILDER COMMENT_STR)
+    add_custom_target(${TARGET_NAME}
+      COMMAND ${SPHINX_EXECUTABLE} -b ${BUILDER} . sphinx/build/${BUILDER}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs
+        DEPENDS doxygen
+        COMMENT ${COMMENT_STR}
+    )
+endmacro(add_sphinx_target)
+
 if(DARMA_SERIALIZATION_ENABLE_DOCS)
   find_package(Doxygen REQUIRED)
-  set(DOXYGEN_ALIASES
-    concept=\"\\xrefitem concept \\\"Concept\\\" \\\"Concepts\\\" \"
-  )
-  doxygen_add_docs(doc
+  find_package(Sphinx REQUIRED)
+  set(DOXYGEN_GENERATE_XML YES)
+  set(DOXYGEN_GENERATE_HTML NO)
+  set(DOXYGEN_XML_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/docs/doxyxml)
+  doxygen_add_docs(doxygen
     ${PROJECT_SOURCE_DIR}/source/include
     COMMENT "Generate Doxygen documentation"
   )
+  # configured documentation tools and intermediate build results
+  set(BINARY_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/docs/.build")
+
+  # Sphinx cache with pickled ReST documents
+  set(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/docs/.doctrees")
+
+  # HTML output directory
+  set(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/docs/html")
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/conf.py.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/docs/conf.py"
+    @ONLY)
+  configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/index.rst.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/docs/index.rst"
+    @ONLY)
+  add_sphinx_target(docs html "Build HTML documentation")
 endif()
